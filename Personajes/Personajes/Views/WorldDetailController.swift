@@ -10,8 +10,6 @@ import UIKit
 
 class WorldDetailController: UIViewController {
     
-    var lastRequestCompleted = false
-    var pages: [Page]?
     var characterParent: Character?
     var world: World?
     
@@ -44,7 +42,6 @@ class WorldDetailController: UIViewController {
         if  segue.identifier == "backToDetail"{
             
             let detailView = segue.destination as! DetailViewController
-            detailView.pages = pages!
             detailView.character = characterParent
         }
         

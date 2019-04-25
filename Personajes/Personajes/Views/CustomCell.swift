@@ -26,4 +26,12 @@ class CustomCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    public func updateText(character: Character){
+        characterName.text = character.name
+        characterBirth.text = character.birth
+        characterGender.text = character.gender
+        characterHeight.text = character.height
+        characterWeight.text = character.weight
+    }
+    
 }
