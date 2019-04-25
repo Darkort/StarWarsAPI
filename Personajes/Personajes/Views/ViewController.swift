@@ -121,18 +121,14 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //unwraping!
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell") as? CustomCell{
+            cell.updateText(character: characters[indexPath.row])
+            return cell
+        }else{
+            let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as UITableViewCell
+            return cell
+        }
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell") as! CustomCell
-        
-        
-        cell.characterName.text = characters[indexPath.row].name
-        cell.characterBirth.text = characters[indexPath.row].birth
-        cell.characterGender.text = characters[indexPath.row].gender
-        cell.characterHeight.text = characters[indexPath.row].height
-        cell.characterWeight.text = characters[indexPath.row].weight
-        
-        return cell
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool){
