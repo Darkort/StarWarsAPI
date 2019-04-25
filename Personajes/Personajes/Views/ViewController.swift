@@ -12,8 +12,8 @@ import Moya
 class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
     
     var connection = MoyaConnection()
-    var nextPage: Int = 1
-    var pages: [Page] = []
+    var nextPage: Int?
+    var characters: [Character] = []
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
@@ -39,7 +39,7 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     
     func refresh(){
-        pages.removeAll()
+        characters.removeAll()
         nextPage = 1
         
         tableView.reloadData()
@@ -53,22 +53,32 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     func getNextPage(){
         
-        if !pages.isEmpty && pages.last?.next == nil{
+        
+        if let next = nextPage{
+            connection.getPage(page: next){ page, error in
+                if error != nil{
+                    self.updateUIonRequestFinished(error: error)
+                } else {
+                    if let results = page?.results{
+                        for character in results{
+                            self.characters.append(character)
+                        }
+                    }
+                    if page?.next != nil{
+                        self.nextPage = next + 1
+                    }else{
+                        self.nextPage = nil;
+                    }
+                    self.updateUIonRequestFinished(error: nil)
+                }
+            }
+        }else if !characters.isEmpty{
             self.updateUIonRequestFinished(error: nil)
             self.log.textColor = UIColor.orange
             self.log.text = "Todas las páginas cargadas"
-            return
+            
         }
         
-        connection.getPage(page: nextPage){ page, error in
-            if error != nil{
-                self.updateUIonRequestFinished(error: error)
-            } else {
-                self.pages.append(page!)
-                self.nextPage += 1
-                self.updateUIonRequestFinished(error: nil)
-            }
-        }
     }
     
     func updateUIonRequestFinished(error: Error?){
@@ -95,11 +105,8 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
             let detailView = segue.destination as! DetailViewController
             
             let indexPath = tableView.indexPathForSelectedRow!
-            let page = getRowPosition(indexPath: indexPath)[0]
-            let index = getRowPosition(indexPath: indexPath)[1]
-            
-            detailView.pages = pages
-            detailView.character = pages[page].results[index]
+        
+            detailView.character =  characters[indexPath.row]
             
         }
         
@@ -109,27 +116,21 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     //TableView Functions
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        var count = 0
-            for page in pages{
-                count += page.results.count
-            }
-        
-        return count
+        return characters.count
     }
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //unwraping!
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell") as! CustomCell
         
-        let page = getRowPosition(indexPath: indexPath)[0]
-        let index = getRowPosition(indexPath: indexPath)[1]
         
-        cell.characterName.text = pages[page].results[index].name
-        cell.characterBirth.text = pages[page].results[index].birth
-        cell.characterGender.text = pages[page].results[index].gender
-        cell.characterHeight.text = pages[page].results[index].height
-        cell.characterWeight.text = pages[page].results[index].weight
+        cell.characterName.text = characters[indexPath.row].name
+        cell.characterBirth.text = characters[indexPath.row].birth
+        cell.characterGender.text = characters[indexPath.row].gender
+        cell.characterHeight.text = characters[indexPath.row].height
+        cell.characterWeight.text = characters[indexPath.row].weight
         
         return cell
     }
@@ -146,13 +147,5 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         }
     }
     
-    func getRowPosition(indexPath: IndexPath)->[Int]{
-        // coord[0] = people page, coord[1] = character index
-        var position = [0,indexPath.row]
-        while pages[position[0]].results.count-1 < position[1]{
-            position[1] -= pages[position[0]].results.count
-            position[0] += 1
-        }
-        return position
-    }
+    
 }

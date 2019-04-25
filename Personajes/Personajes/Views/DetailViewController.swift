@@ -10,8 +10,6 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    var lastRequestCompleted = false
-    var pages: [Page]?
     var character: Character?
     var characterSpecie: Other?
     var vehicles:[Other]?
@@ -54,16 +52,9 @@ class DetailViewController: UIViewController {
             
             let worldDetailView = segue.destination as! WorldDetailController
             
-            worldDetailView.lastRequestCompleted = lastRequestCompleted
-            worldDetailView.pages = pages!
             worldDetailView.world = character?.homeworld
             worldDetailView.characterParent = character
-        }else if segue.identifier == "toMaster"{
-            
-            let masterView = segue.destination as! ViewController
-            masterView.pages = pages!
         }
-        
     }
     
     func updateCharacterData(){
